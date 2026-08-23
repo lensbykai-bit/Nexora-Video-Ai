@@ -2,9 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#090b12" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Nexora AI" />
   <title>Nexora Video AI</title>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -14,23 +21,23 @@
         <p class="eyebrow">NEXORA AI STUDIO</p>
         <h1>Nexora Video AI</h1>
       </div>
-      <span class="version">v1.0</span>
+      <span class="version">v1.1</span>
     </header>
 
     <section class="hero card">
       <div class="hero-badge">AI VIDEO DUBBING</div>
       <h2>Paste. Translate. Voice. Export.</h2>
-      <p>Import a video link, generate subtitles, choose a language and AI voice, then prepare the final dubbed video.</p>
+      <p>Import a video you are allowed to use, generate subtitles, choose a language and licensed AI voice, then prepare the final dubbed video.</p>
     </section>
 
     <section class="card">
       <div class="section-title">
         <span class="step">1</span>
-        <div><h3>Import Video</h3><p>Paste a public video link or select a local file.</p></div>
+        <div><h3>Import Video</h3><p>Paste a direct/public video link you have permission to use or select a local file.</p></div>
       </div>
       <label for="videoLink">Video URL</label>
       <div class="input-row">
-        <input id="videoLink" type="url" placeholder="https://example.com/video" />
+        <input id="videoLink" type="url" placeholder="https://example.com/video.mp4" inputmode="url" />
         <button id="pasteBtn" class="secondary">Paste</button>
       </div>
       <button id="importBtn" class="primary full">Import Video</button>
