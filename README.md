@@ -1,25 +1,36 @@
-# Nexora Video AI v1.0
+# Nexora Video AI v1.1
 
-Mobile-first AI video dubbing interface.
+Mobile-first AI video dubbing and subtitle tool, designed as an installable PWA for Android and mobile browsers.
 
-## Current UI features
-- Paste a video URL
-- Upload a video from a phone
-- Source language auto-detect option
+## Included now
+- Paste a permitted direct/public video URL
+- Select a video from a phone and preview it locally
+- Source-language Auto Detect option
 - Output languages: English, Khmer, Chinese, French, Spanish, German, Russian, Japanese, Korean, Thai, Vietnamese, Indonesian
-- Subtitle generation flow
-- AI voice presets including `Adam — English · Deep / Firm`
+- Subtitle workflow
+- Licensed AI voice presets including `Adam — English · Deep / Firm`
 - Keep background music / separate voice and music options
 - Preview timeline UI
 - MP4 export target in 720p or 1080p
+- `/api/health` backend health endpoint
+- `/api/process` job creation + request validation endpoint
+- Installable PWA manifest, app icon and service worker
+- Vercel-ready configuration
 
-## Current build stage
-This version implements the responsive frontend and interaction flow. Real URL importing, transcription, translation, TTS, audio separation, synchronization, and MP4 rendering require a backend/API layer and are intentionally not faked in the current UI.
+## AI provider stage
+The app and backend job layer are in place. Actual transcription, translation, TTS, audio separation, synchronization and MP4 rendering need external provider credentials. Put credentials in Vercel encrypted environment variables using the names in `.env.example`; never commit real API keys to GitHub.
 
-## Files
-- `index.html` — app interface
-- `styles.css` — responsive mobile design
-- `app.js` — frontend interactions
+## Project files
+- `index.html` — mobile app interface
+- `styles.css` — responsive design
+- `app.js` — frontend interactions, local preview, backend connection and PWA registration
+- `api/health.js` — backend status endpoint
+- `api/process.js` — video processing job validation/creation
+- `manifest.webmanifest` — installable app settings
+- `sw.js` — PWA cache shell
+- `icon.svg` — app icon
+- `vercel.json` — Vercel deployment configuration
+- `.env.example` — provider variable names only
 
-## Safety / rights
-Only process videos and voices you have permission to use. Voice presets should use licensed synthetic voices rather than unauthorized cloning of real people.
+## Rights and safety
+Only process videos and audio you have permission to use. The app should use licensed synthetic voices rather than unauthorized cloning of real people. It does not include logic for bypassing DRM, paywalls, platform protections or access controls.
