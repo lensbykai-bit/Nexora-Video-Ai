@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#090b12" />
+  <title>Nexora Video AI</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">NEXORA AI STUDIO</p>
+        <h1>Nexora Video AI</h1>
+      </div>
+      <span class="version">v1.0</span>
+    </header>
+
+    <section class="hero card">
+      <div class="hero-badge">AI VIDEO DUBBING</div>
+      <h2>Paste. Translate. Voice. Export.</h2>
+      <p>Import a video link, generate subtitles, choose a language and AI voice, then prepare the final dubbed video.</p>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <span class="step">1</span>
+        <div><h3>Import Video</h3><p>Paste a public video link or select a local file.</p></div>
+      </div>
+      <label for="videoLink">Video URL</label>
+      <div class="input-row">
+        <input id="videoLink" type="url" placeholder="https://example.com/video" />
+        <button id="pasteBtn" class="secondary">Paste</button>
+      </div>
+      <button id="importBtn" class="primary full">Import Video</button>
+      <label class="upload-btn full" for="videoFile">Upload from phone</label>
+      <input id="videoFile" type="file" accept="video/*" hidden />
+      <div id="sourceStatus" class="status muted">No video selected</div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <span class="step">2</span>
+        <div><h3>Language & Subtitles</h3><p>Auto detect the source, then choose your output language.</p></div>
+      </div>
+      <div class="grid-two">
+        <div>
+          <label for="sourceLanguage">Source</label>
+          <select id="sourceLanguage">
+            <option value="auto">Auto Detect</option>
+            <option>English</option><option>Khmer</option><option>Chinese</option><option>French</option>
+            <option>Spanish</option><option>German</option><option>Russian</option><option>Japanese</option>
+            <option>Korean</option><option>Thai</option><option>Vietnamese</option><option>Indonesian</option>
+          </select>
+        </div>
+        <div>
+          <label for="targetLanguage">Output</label>
+          <select id="targetLanguage">
+            <option>English</option><option>Khmer</option><option>Chinese</option><option>French</option>
+            <option>Spanish</option><option>German</option><option>Russian</option><option>Japanese</option>
+            <option>Korean</option><option>Thai</option><option>Vietnamese</option><option>Indonesian</option>
+          </select>
+        </div>
+      </div>
+      <button id="subtitleBtn" class="primary full">Create Subtitles</button>
+      <div id="subtitleStatus" class="status muted">Subtitles not generated</div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <span class="step">3</span>
+        <div><h3>AI Voice</h3><p>Choose a licensed AI voice preset for dubbing.</p></div>
+      </div>
+      <label for="voiceSelect">Voice preset</label>
+      <select id="voiceSelect">
+        <option>Adam — English · Deep / Firm</option>
+        <option>Emma — English · Clear / Warm</option>
+        <option>Khmer Male — Natural</option>
+        <option>Khmer Female — Natural</option>
+        <option>Multilingual Male — Neutral</option>
+        <option>Multilingual Female — Neutral</option>
+      </select>
+      <div class="audio-controls">
+        <button id="voicePreview" class="secondary">▶ Voice Preview</button>
+        <button id="generateVoice" class="primary">Generate Voice</button>
+      </div>
+      <div class="mix-row">
+        <label><input type="checkbox" id="keepMusic" checked /> Keep background music</label>
+        <label><input type="checkbox" id="separateTracks" checked /> Separate voice/music</label>
+      </div>
+      <div id="voiceStatus" class="status muted">Voice not generated</div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <span class="step">4</span>
+        <div><h3>Preview & Export</h3><p>Review the processing flow before final export.</p></div>
+      </div>
+      <div class="preview-box" id="previewBox">
+        <div class="play-circle">▶</div>
+        <p>Video preview</p>
+      </div>
+      <div class="timeline">
+        <div class="track"><span>VIDEO</span><div class="bar"></div></div>
+        <div class="track"><span>VOICE</span><div class="bar short"></div></div>
+        <div class="track"><span>SUB</span><div class="bar tiny"></div></div>
+      </div>
+      <div class="grid-two">
+        <div><label for="quality">Quality</label><select id="quality"><option>1080p</option><option>720p</option></select></div>
+        <div><label for="format">Format</label><select id="format"><option>MP4</option></select></div>
+      </div>
+      <button id="exportBtn" class="export full">Export Video</button>
+      <div id="exportStatus" class="status muted">Ready for setup</div>
+    </section>
+
+    <nav class="bottom-nav">
+      <button class="active">Home</button><button>Projects</button><button>Voices</button><button>Settings</button>
+    </nav>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
