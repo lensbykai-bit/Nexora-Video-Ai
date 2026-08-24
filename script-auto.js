@@ -1,3 +1,4 @@
+// Nexora Video AI Personal v1.8
 (() => {
   let latestScript = '';
   const nativeFetch = window.fetch.bind(window);
