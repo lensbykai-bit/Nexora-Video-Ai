@@ -16,6 +16,8 @@ on:
       - 'package.json'
       - 'scripts/**'
       - '.github/workflows/android-apk.yml'
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
