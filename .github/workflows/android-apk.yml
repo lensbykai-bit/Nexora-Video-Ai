@@ -80,3 +80,14 @@ jobs:
         run: |
           TAG="v1.6-build-${GITHUB_RUN_NUMBER}"
           gh release create "$TAG" Nexora-Video-AI-v1.6-debug.apk --title "Nexora Video AI v1.6 APK build ${GITHUB_RUN_NUMBER}" --notes "Automated Android debug APK build for Nexora Video AI v1.6."
+
+      - name: Commit APK into repository
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p apk
+          cp Nexora-Video-AI-v1.6-debug.apk apk/Nexora-Video-AI-v1.6-debug.apk
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apk/Nexora-Video-AI-v1.6-debug.apk
+          git commit -m "Add Android APK build ${GITHUB_RUN_NUMBER}" || exit 0
+          git push
