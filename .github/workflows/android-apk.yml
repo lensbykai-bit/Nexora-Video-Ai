@@ -10,6 +10,7 @@ on:
       - 'bootstrap.js'
       - 'script-auto.js'
       - 'app.js'
+      - 'api/**'
       - 'manifest.webmanifest'
       - 'icon.svg'
       - 'sw.js'
@@ -64,13 +65,13 @@ jobs:
           ./gradlew assembleDebug
 
       - name: Rename APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk Nexora-Video-AI-v1.7-debug.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Nexora-Video-AI-Personal-v1.8-debug.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Nexora-Video-AI-v1.7-APK
-          path: Nexora-Video-AI-v1.7-debug.apk
+          name: Nexora-Video-AI-Personal-v1.8-APK
+          path: Nexora-Video-AI-Personal-v1.8-debug.apk
           if-no-files-found: error
           retention-days: 30
 
@@ -79,16 +80,16 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="v1.7-build-${GITHUB_RUN_NUMBER}"
-          gh release create "$TAG" Nexora-Video-AI-v1.7-debug.apk --title "Nexora Video AI v1.7 APK build ${GITHUB_RUN_NUMBER}" --notes "Automated Android debug APK build for Nexora Video AI v1.7 with Auto Generate Script."
+          TAG="v1.8-build-${GITHUB_RUN_NUMBER}"
+          gh release create "$TAG" Nexora-Video-AI-Personal-v1.8-debug.apk --title "Nexora Video AI Personal v1.8 APK build ${GITHUB_RUN_NUMBER}" --notes "Personal workflow: Upload Video → AI Generate Script → Auto Subtitle → Edit/Translate → Adam Voice → Export MP4."
 
       - name: Commit APK into repository
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           mkdir -p apk
-          cp Nexora-Video-AI-v1.7-debug.apk apk/Nexora-Video-AI-v1.7-debug.apk
+          cp Nexora-Video-AI-Personal-v1.8-debug.apk apk/Nexora-Video-AI-Personal-v1.8-debug.apk
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apk/Nexora-Video-AI-v1.7-debug.apk
-          git commit -m "Add Android APK v1.7 build ${GITHUB_RUN_NUMBER}" || exit 0
+          git add apk/Nexora-Video-AI-Personal-v1.8-debug.apk
+          git commit -m "Add Android APK Personal v1.8 build ${GITHUB_RUN_NUMBER}" || exit 0
           git push
