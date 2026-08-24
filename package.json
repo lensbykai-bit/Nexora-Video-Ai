@@ -1,6 +1,6 @@
 {
-  "name": "nexora-video-ai",
-  "version": "1.8.0",
+  "name": "nexora-narrator",
+  "version": "2.0.0",
   "private": true,
   "engines": { "node": ">=20" },
   "scripts": {
