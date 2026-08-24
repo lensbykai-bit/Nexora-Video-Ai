@@ -3,6 +3,7 @@
   "appName": "Nexora Video AI",
   "webDir": "www",
   "server": {
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "allowNavigation": ["*"]
   }
 }
