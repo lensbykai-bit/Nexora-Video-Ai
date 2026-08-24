@@ -3,11 +3,9 @@ const path = require('path');
 
 const root = process.cwd();
 const out = path.join(root, 'www');
-const files = ['index.html', 'styles.css', 'bootstrap.js', 'script-auto.js', 'app.js', 'manifest.webmanifest', 'icon.svg', 'sw.js'];
+const files = ['index.html', 'styles.css', 'bootstrap.js', 'studio.js', 'manifest.webmanifest', 'icon.svg', 'sw.js'];
 
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
-for (const file of files) {
-  fs.copyFileSync(path.join(root, file), path.join(out, file));
-}
-console.log(`Prepared ${files.length} web assets in ${out}`);
+for (const file of files) fs.copyFileSync(path.join(root, file), path.join(out, file));
+console.log(`Prepared ${files.length} new studio assets in ${out}`);
