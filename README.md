@@ -1,9 +1,14 @@
-# Nexora Video AI v1.4
+# Nexora Video AI v1.5
 
 Mobile-first AI video dubbing and subtitle PWA for Android and mobile browsers.
 
-## Final wired workflow
-Paste a permitted public media URL → create processing job → transcribe → detect language → translate to selected output language → generate licensed AI voice → save voice to Vercel Blob → submit final renderer → show render job or downloadable MP4 URL.
+## End-to-end workflow
+Paste a permitted public media URL **or upload a video from the phone** → create processing job → transcribe → detect language → translate to selected output language → generate licensed AI voice → save voice to Vercel Blob → submit final renderer → poll renderer status → open/download the final MP4 URL.
+
+## Phone video upload
+Large phone videos use Vercel Blob client uploads, so the video goes directly from the browser to Blob rather than through the Vercel Function request-body limit. The app supports MP4, WebM, QuickTime/MOV and M4V uploads up to 1 GB in the upload token policy. After upload, the returned Blob URL is automatically used to create the processing job.
+
+`ALLOWED_ORIGIN` can optionally restrict which deployed site origins may request upload tokens.
 
 ## Languages
 English, Khmer, Chinese, French, Spanish, German, Russian, Japanese, Korean, Thai, Vietnamese and Indonesian.
@@ -12,19 +17,18 @@ English, Khmer, Chinese, French, Spanish, German, Russian, Japanese, Korean, Tha
 Adam — English · Deep / Firm; Emma — English · Clear / Warm; Khmer Male/Female; Multilingual Male/Female. Each preset uses a licensed provider voice ID supplied through environment variables.
 
 ## API endpoints
-- `GET /api/health` — provider readiness and full-pipeline status
-- `POST /api/process` — validate input and create a job
+- `GET /api/health` — provider readiness and pipeline status
+- `POST /api/upload` — Vercel Blob client-upload token/callback route for phone videos
+- `POST /api/process` — validate input and create a processing job
 - `POST /api/transcribe` — AssemblyAI transcription
 - `GET /api/transcript-status?id=...` — transcription polling
 - `POST /api/translate` — translation provider adapter
-- `POST /api/voice` — ElevenLabs TTS; `persist:true` saves MP3 to Vercel Blob
-- `POST /api/render` — final MP4 renderer adapter
-
-## Runtime dependency
-`@vercel/blob` is declared in `package.json` for persistent generated-audio storage.
+- `POST /api/voice` — ElevenLabs TTS; `persist:true` saves generated MP3 to Vercel Blob
+- `POST /api/render` — submit final MP4 renderer job
+- `GET /api/render-status?id=...` — poll asynchronous renderer jobs
 
 ## Environment variables
-Use `.env.example` as the exact list and store real values only in encrypted Vercel Environment Variables.
+Use `.env.example` as the exact list and keep real values only in encrypted Vercel Environment Variables.
 
 Required for the complete live pipeline:
 - `ASSEMBLYAI_API_KEY`
@@ -36,13 +40,16 @@ Required for the complete live pipeline:
 - `RENDER_API_URL`
 - `RENDER_API_KEY`
 
-Optional voice presets use their matching `ELEVENLABS_*_VOICE_ID` variables.
+Optional:
+- `ALLOWED_ORIGIN`
+- `RENDER_STATUS_API_URL` (supports `{id}` placeholder)
+- Additional `ELEVENLABS_*_VOICE_ID` variables for optional voice presets
 
 ## Mobile behavior
-The app is installable as a PWA. Local phone videos can be previewed. AI processing is intentionally restricted to permitted public media URLs in this version; it does not bypass platform protection, DRM, paywalls, or access controls.
+The app is installable as a PWA. Selecting a phone video immediately shows a local preview, then uploads it directly to Vercel Blob with progress feedback when storage is configured. The cloud URL is inserted automatically for transcription and rendering.
 
 ## System status
-The Home screen now checks `/api/health` and clearly reports which external services are missing. When all provider credentials are configured, it reports that the full pipeline is ready.
+The Home screen calls `/api/health` and reports which external services are missing. When transcription, translation, voice, storage and renderer credentials are configured, the app reports that the full pipeline is ready.
 
-## Important
-The source application is complete for the configured architecture. External AI and rendering services cannot execute without real provider accounts/credentials; those secrets are deliberately not committed to GitHub.
+## Rights and safety
+Only process videos and audio you have permission to use. Use licensed synthetic voices rather than unauthorized cloning of real people. The app does not include logic for bypassing DRM, paywalls, platform protections, or access controls.
