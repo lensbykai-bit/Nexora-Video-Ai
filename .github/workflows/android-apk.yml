@@ -20,7 +20,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-apk:
@@ -41,6 +41,9 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Install dependencies
         run: npm install
 
@@ -55,7 +58,9 @@ jobs:
 
       - name: Build debug APK
         working-directory: android
-        run: ./gradlew assembleDebug
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug
 
       - name: Rename APK
         run: cp android/app/build/outputs/apk/debug/app-debug.apk Nexora-Video-AI-v1.6-debug.apk
@@ -67,3 +72,11 @@ jobs:
           path: Nexora-Video-AI-v1.6-debug.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish APK release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v1.6-build-${GITHUB_RUN_NUMBER}"
+          gh release create "$TAG" Nexora-Video-AI-v1.6-debug.apk --title "Nexora Video AI v1.6 APK build ${GITHUB_RUN_NUMBER}" --notes "Automated Android debug APK build for Nexora Video AI v1.6."
