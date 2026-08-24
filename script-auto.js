@@ -1,29 +1,31 @@
 (() => {
-  let capturedTranscript = '';
+  let latestScript = '';
   const nativeFetch = window.fetch.bind(window);
 
   const getScriptText = () => {
     const editor = document.getElementById('scriptEditor');
-    return (editor?.value || capturedTranscript || '').trim();
+    return (editor?.value || latestScript || '').trim();
   };
 
-  const fillScript = (text, auto = false) => {
-    if (!text) return;
-    capturedTranscript = text.trim();
-    const editor = document.getElementById('scriptEditor');
-    if (editor && (auto || !editor.value.trim())) editor.value = capturedTranscript;
+  const setScriptStatus = (message, ok = false) => {
     const status = document.getElementById('scriptStatus');
-    if (status) {
-      status.textContent = `Script ready · ${capturedTranscript.length} characters`;
-      status.classList.remove('muted');
-      status.style.color = '#5be5cf';
-    }
+    if (!status) return;
+    status.textContent = message;
+    status.classList.toggle('muted', !ok);
+    status.style.color = ok ? '#5be5cf' : '';
+  };
+
+  const fillScript = (text) => {
+    if (!text) return;
+    latestScript = text.trim();
+    const editor = document.getElementById('scriptEditor');
+    if (editor) editor.value = latestScript;
+    setScriptStatus(`Script ready · ${latestScript.length} characters`, true);
   };
 
   window.fetch = async (input, init = {}) => {
     const url = typeof input === 'string' ? input : input?.url || '';
     let nextInit = init;
-
     if ((url.includes('/api/voice') || url.includes('/api/render')) && typeof init.body === 'string') {
       const script = getScriptText();
       if (script) {
@@ -35,27 +37,7 @@
         } catch {}
       }
     }
-
-    const response = await nativeFetch(input, nextInit);
-
-    if (url.includes('/api/transcript-status')) {
-      try {
-        const clone = response.clone();
-        const data = await clone.json();
-        const transcript = data?.transcript;
-        if (transcript?.status === 'completed' && transcript?.text) fillScript(transcript.text, true);
-      } catch {}
-    }
-
-    if (url.includes('/api/translate')) {
-      try {
-        const clone = response.clone();
-        const data = await clone.json();
-        if (data?.translatedText) fillScript(data.translatedText, true);
-      } catch {}
-    }
-
-    return response;
+    return nativeFetch(input, nextInit);
   };
 
   window.addEventListener('DOMContentLoaded', () => {
@@ -63,27 +45,37 @@
     const clear = document.getElementById('clearScriptBtn');
     const editor = document.getElementById('scriptEditor');
 
-    generate?.addEventListener('click', () => {
-      if (capturedTranscript) fillScript(capturedTranscript, true);
-      else {
-        const status = document.getElementById('scriptStatus');
-        if (status) status.textContent = 'Create subtitles first. Script will generate automatically.';
+    generate?.addEventListener('click', async () => {
+      const videoUrl = (document.getElementById('videoLink')?.value || '').trim();
+      if (!videoUrl) return setScriptStatus('Upload a video first.');
+      generate.disabled = true;
+      setScriptStatus('AI is analyzing your video and writing narration…');
+      try {
+        const targetLanguage = document.getElementById('targetLanguage')?.value || 'English';
+        const response = await fetch('/api/analyze-video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ videoUrl, language: targetLanguage, style: 'natural spoken narration' })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Unable to generate script from video.');
+        fillScript(data.script);
+      } catch (error) {
+        setScriptStatus(error.message || 'Video script generation failed.');
+      } finally {
+        generate.disabled = false;
       }
     });
 
     clear?.addEventListener('click', () => {
       if (editor) editor.value = '';
-      const status = document.getElementById('scriptStatus');
-      if (status) {
-        status.textContent = 'Script cleared. Tap Auto Generate Script to restore the latest transcript.';
-        status.classList.add('muted');
-        status.style.color = '';
-      }
+      latestScript = '';
+      setScriptStatus('Script cleared.');
     });
 
     editor?.addEventListener('input', () => {
-      const status = document.getElementById('scriptStatus');
-      if (status) status.textContent = `Edited script · ${editor.value.length} characters`;
+      latestScript = editor.value;
+      setScriptStatus(`Edited script · ${editor.value.length} characters`, true);
     });
   });
 })();
