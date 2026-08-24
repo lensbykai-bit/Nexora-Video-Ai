@@ -1,144 +1,32 @@
 const $ = (id) => document.getElementById(id);
 const setStatus = (id, message, ok = false) => { const el=$(id); if(!el)return; el.textContent=message; el.classList.remove('muted'); el.style.color=ok?'#5be5cf':'#c9d1e2'; };
 const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
-const langMap={en:'English',km:'Khmer',zh:'Chinese',fr:'French',es:'Spanish',de:'German',ru:'Russian',ja:'Japanese',ko:'Korean',th:'Thai',vi:'Vietnamese',id:'Indonesian'};
-let currentJob=null, selectedLocalFile=null, transcriptText='', translatedText='', transcriptId=null, lastVoiceUrl=null, lastVoicePreviewUrl=null, blobReady=false, renderReady=false;
+let currentJob=null, selectedLocalFile=null, translatedText='', lastVoiceUrl=null, lastVoicePreviewUrl=null, blobReady=false, renderReady=false;
 
 const originalFetch=window.fetch.bind(window);
 const normalizeBase=(v='')=>v.trim().replace(/\/+$/,'');
 const getBackendBase=()=>normalizeBase(localStorage.getItem('nexoraBackendUrl')||'');
 const apiUrl=(path)=>`${getBackendBase()}${path}`;
-window.fetch=(input,init)=>{
-  if(typeof input==='string' && input.startsWith('/api/')) return originalFetch(apiUrl(input),init);
-  return originalFetch(input,init);
-};
+window.fetch=(input,init)=> typeof input==='string' && input.startsWith('/api/') ? originalFetch(apiUrl(input),init) : originalFetch(input,init);
 
 const backendInput=$('backendUrl');
 if(backendInput) backendInput.value=getBackendBase();
-$('saveBackendBtn')?.addEventListener('click',()=>{
-  const value=normalizeBase(backendInput?.value||'');
-  if(value){
-    try{const u=new URL(value);if(u.protocol!=='https:'&&u.protocol!=='http:')throw new Error();}
-    catch{return setStatus('systemStatus','Enter a valid backend URL, for example https://your-project.vercel.app');}
-    localStorage.setItem('nexoraBackendUrl',value);
-  }else localStorage.removeItem('nexoraBackendUrl');
-  setStatus('systemStatus','Backend saved. Rechecking services…',true);
-  setTimeout(()=>location.reload(),400);
-});
+$('saveBackendBtn')?.addEventListener('click',()=>{const value=normalizeBase(backendInput?.value||'');if(value){try{const u=new URL(value);if(!['https:','http:'].includes(u.protocol))throw new Error();}catch{return setStatus('systemStatus','Enter a valid backend URL.');}localStorage.setItem('nexoraBackendUrl',value);}else localStorage.removeItem('nexoraBackendUrl');setStatus('systemStatus','Backend saved. Rechecking services…',true);setTimeout(()=>location.reload(),400);});
 
-async function generateVoiceAudio(text,persist=false){
-  const response=await fetch('/api/voice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,voice:$('voiceSelect').value,persist})});
-  if(!response.ok){let m='Voice generation failed.';try{const d=await response.json();m=d.error||m;}catch{}throw new Error(m);}
-  if(persist){const data=await response.json();lastVoiceUrl=data.audioUrl;return data.audioUrl;}
-  const blob=await response.blob();if(lastVoicePreviewUrl)URL.revokeObjectURL(lastVoicePreviewUrl);lastVoicePreviewUrl=URL.createObjectURL(blob);return lastVoicePreviewUrl;
-}
+async function generateVoiceAudio(text,persist=false){const response=await fetch('/api/voice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,voice:$('voiceSelect').value,persist})});if(!response.ok){let m='Voice generation failed.';try{const d=await response.json();m=d.error||m;}catch{}throw new Error(m);}if(persist){const data=await response.json();lastVoiceUrl=data.audioUrl;return data.audioUrl;}const blob=await response.blob();if(lastVoicePreviewUrl)URL.revokeObjectURL(lastVoicePreviewUrl);lastVoicePreviewUrl=URL.createObjectURL(blob);return lastVoicePreviewUrl;}
+async function translateText(text){const response=await fetch('/api/translate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,targetLanguage:$('targetLanguage').value})});const data=await response.json();if(!response.ok)throw new Error(data.error||'Translation failed.');return data.translatedText;}
+async function uploadPhoneVideo(file){if(!blobReady)throw new Error('Video storage is not configured yet.');const { upload }=await import('https://esm.sh/@vercel/blob@2/client');const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');const result=await upload(`uploads/${Date.now()}-${safeName}`,file,{access:'public',handleUploadUrl:apiUrl('/api/upload'),multipart:true,contentType:file.type||'video/mp4',onUploadProgress:({percentage})=>setStatus('sourceStatus',`Uploading… ${Math.round(percentage)}%`)});return result.url;}
+async function createProcessingJob(videoUrl){const r=await fetch('/api/process',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({videoUrl,sourceLanguage:$('sourceLanguage').value,targetLanguage:$('targetLanguage').value,voice:$('voiceSelect').value,keepMusic:$('keepMusic').checked,separateTracks:$('separateTracks').checked})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Unable to create job.');currentJob=d.job;translatedText='';lastVoiceUrl=null;return currentJob;}
+async function pollRender(jobId){for(let i=0;i<120;i++){const r=await fetch(`/api/render-status?id=${encodeURIComponent(jobId)}`);const d=await r.json();if(!r.ok)throw new Error(d.error||'Unable to read render status.');const render=d.render||{};const status=render.status||render.state||'processing';const output=render.outputUrl||render.url||render.downloadUrl||null;if(output){setStatus('exportStatus','Render complete. Tap here to open MP4.',true);const s=$('exportStatus');s.style.cursor='pointer';s.onclick=()=>window.open(output,'_blank','noopener');return;}if(['failed','error','cancelled'].includes(String(status).toLowerCase()))throw new Error(render.error||'Render failed.');setStatus('exportStatus',`Rendering… ${status}`);await sleep(4000);}setStatus('exportStatus','Render is still processing.');}
 
-async function translateText(text){
-  const response=await fetch('/api/translate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,targetLanguage:$('targetLanguage').value})});
-  const data=await response.json();if(!response.ok)throw new Error(data.error||'Translation failed.');return data.translatedText;
-}
+$('videoFile')?.addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;selectedLocalFile=f;currentJob=null;translatedText='';lastVoiceUrl=null;const localUrl=URL.createObjectURL(f);$('previewBox').innerHTML=`<video controls playsinline style="width:100%;max-height:420px;border-radius:18px;background:#000" src="${localUrl}"></video>`;setStatus('sourceStatus',`Selected: ${f.name}. Preparing upload…`,true);try{const cloudUrl=await uploadPhoneVideo(f);$('videoLink').value=cloudUrl;const job=await createProcessingJob(cloudUrl);setStatus('sourceStatus',`Upload complete. Job ${job.id.slice(0,8)} ready.`,true);setStatus('scriptStatus','Video ready. Tap Generate Script from Video.',true);}catch(err){setStatus('sourceStatus',err.message||'Phone upload failed.');}});
 
-async function pollTranscript(id){
-  for(let i=0;i<120;i++){
-    const r=await fetch(`/api/transcript-status?id=${encodeURIComponent(id)}`);const d=await r.json();
-    if(!r.ok)throw new Error(d.error||'Unable to read transcription status.');const t=d.transcript;
-    if(t.status==='completed'){transcriptText=t.text||'';return t;}
-    if(t.status==='error')throw new Error(t.error||'Transcription failed.');
-    setStatus('subtitleStatus',`Transcribing… ${t.status||'processing'}`);await sleep(3000);
-  }
-  throw new Error('Transcription is taking longer than expected.');
-}
+$('subtitleBtn')?.addEventListener('click',async()=>{const script=($('scriptEditor')?.value||'').trim();if(!script)return setStatus('subtitleStatus','Generate or write a script first.');$('subtitleBtn').disabled=true;setStatus('subtitleStatus','Creating subtitles from script…');try{translatedText=script;const target=$('targetLanguage').value;if(target && target!=='English'){setStatus('subtitleStatus',`Translating script to ${target}…`);translatedText=await translateText(script);$('scriptEditor').value=translatedText;}const preview=translatedText.slice(0,180);setStatus('subtitleStatus',`Subtitles ready: ${preview}${preview.length>=180?'…':''}`,true);setStatus('voiceStatus','Script/subtitles ready for Adam voice.',true);}catch(e){setStatus('subtitleStatus',e.message||'Subtitle generation failed.');}finally{$('subtitleBtn').disabled=false;}});
 
-async function uploadPhoneVideo(file){
-  if(!blobReady) throw new Error('Video storage is not configured yet.');
-  const { upload } = await import('https://esm.sh/@vercel/blob@2/client');
-  const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-  const result=await upload(`uploads/${Date.now()}-${safeName}`,file,{
-    access:'public',handleUploadUrl:apiUrl('/api/upload'),multipart:true,contentType:file.type||'video/mp4',
-    onUploadProgress:({percentage})=>setStatus('sourceStatus',`Uploading from phone… ${Math.round(percentage)}%`)
-  });
-  return result.url;
-}
+$('voicePreview')?.addEventListener('click',async()=>{const text=(($('scriptEditor')?.value||translatedText||'Welcome to Nexora Video AI.').trim()).slice(0,220);$('voicePreview').disabled=true;setStatus('voiceStatus','Generating voice preview…');try{const u=await generateVoiceAudio(text,false);await new Audio(u).play();setStatus('voiceStatus',`Playing ${$('voiceSelect').value}.`,true);}catch(e){setStatus('voiceStatus',e.message);}finally{$('voicePreview').disabled=false;}});
+$('generateVoice')?.addEventListener('click',async()=>{const text=($('scriptEditor')?.value||translatedText||'').trim();if(!text)return setStatus('voiceStatus','Generate a script first.');$('generateVoice').disabled=true;setStatus('voiceStatus','Generating and saving Adam voice…');try{await generateVoiceAudio(text.slice(0,4000),true);setStatus('voiceStatus','Adam voice generated and saved for rendering.',true);}catch(e){setStatus('voiceStatus',e.message);}finally{$('generateVoice').disabled=false;}});
+$('exportBtn')?.addEventListener('click',async()=>{const videoUrl=$('videoLink').value.trim();const script=($('scriptEditor')?.value||translatedText||'').trim();if(!currentJob||!videoUrl)return setStatus('exportStatus','Upload a video first.');if(!lastVoiceUrl)return setStatus('exportStatus','Generate Adam voice before export.');if(!renderReady)return setStatus('exportStatus','Renderer is not configured yet.');$('exportBtn').disabled=true;setStatus('exportStatus','Sending final render request…');try{const r=await fetch('/api/render',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({videoUrl,voiceUrl:lastVoiceUrl,subtitles:script,quality:$('quality').value,keepMusic:$('keepMusic').checked,separateTracks:$('separateTracks').checked})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Render request failed.');const output=d.render?.outputUrl||d.render?.url||d.render?.downloadUrl||null;if(output){setStatus('exportStatus','Render complete. Tap here to open MP4.',true);const s=$('exportStatus');s.style.cursor='pointer';s.onclick=()=>window.open(output,'_blank','noopener');}else{const id=d.render?.id||d.render?.jobId||null;if(id)await pollRender(id);else setStatus('exportStatus','Render request submitted.',true);}}catch(e){setStatus('exportStatus',e.message);}finally{$('exportBtn').disabled=false;}});
 
-async function createProcessingJob(videoUrl){
-  const r=await fetch('/api/process',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({videoUrl,sourceLanguage:$('sourceLanguage').value,targetLanguage:$('targetLanguage').value,voice:$('voiceSelect').value,keepMusic:$('keepMusic').checked,separateTracks:$('separateTracks').checked})});
-  const d=await r.json();if(!r.ok)throw new Error(d.error||'Unable to create job.');
-  currentJob=d.job;transcriptText='';translatedText='';transcriptId=null;lastVoiceUrl=null;
-  return currentJob;
-}
-
-async function pollRender(jobId){
-  for(let i=0;i<120;i++){
-    const r=await fetch(`/api/render-status?id=${encodeURIComponent(jobId)}`);const d=await r.json();
-    if(!r.ok)throw new Error(d.error||'Unable to read render status.');
-    const render=d.render||{};const status=render.status||render.state||'processing';
-    const output=render.outputUrl||render.url||render.downloadUrl||null;
-    if(output){setStatus('exportStatus','Render complete. Tap here to open the MP4.',true);const s=$('exportStatus');s.style.cursor='pointer';s.onclick=()=>window.open(output,'_blank','noopener');return;}
-    if(['failed','error','cancelled'].includes(String(status).toLowerCase()))throw new Error(render.error||'Render failed.');
-    setStatus('exportStatus',`Rendering… ${status}`);await sleep(4000);
-  }
-  setStatus('exportStatus','Render is still processing. Try Export again to check later.');
-}
-
-$('pasteBtn').addEventListener('click',async()=>{try{$('videoLink').value=await navigator.clipboard.readText();}catch{setStatus('sourceStatus','Clipboard permission unavailable. Paste manually.');}});
-
-$('importBtn').addEventListener('click',async()=>{
-  const videoUrl=$('videoLink').value.trim();if(!videoUrl)return setStatus('sourceStatus','Please paste a video link first.');
-  $('importBtn').disabled=true;setStatus('sourceStatus','Creating processing job…');
-  try{const job=await createProcessingJob(videoUrl);setStatus('sourceStatus',`Job ${job.id.slice(0,8)} created.`,true);setStatus('subtitleStatus','Ready to create subtitles.',true);}catch(e){setStatus('sourceStatus',e.message);}finally{$('importBtn').disabled=false;}
-});
-
-$('videoFile').addEventListener('change',async e=>{
-  const f=e.target.files?.[0];if(!f)return;selectedLocalFile=f;currentJob=null;transcriptText='';translatedText='';lastVoiceUrl=null;
-  const localUrl=URL.createObjectURL(f);$('previewBox').innerHTML=`<video controls playsinline style="width:100%;max-height:420px;border-radius:18px;background:#000" src="${localUrl}"></video>`;
-  setStatus('sourceStatus',`Selected: ${f.name}. Preparing upload…`,true);
-  try{
-    const cloudUrl=await uploadPhoneVideo(f);$('videoLink').value=cloudUrl;
-    const job=await createProcessingJob(cloudUrl);setStatus('sourceStatus',`Upload complete. Job ${job.id.slice(0,8)} created.`,true);setStatus('subtitleStatus','Phone video is ready for subtitles.',true);
-  }catch(err){setStatus('sourceStatus',err.message||'Phone upload failed.');}
-});
-
-$('subtitleBtn').addEventListener('click',async()=>{
-  const mediaUrl=$('videoLink').value.trim();if(!currentJob||!mediaUrl)return setStatus('subtitleStatus','Import or upload a video first.');
-  $('subtitleBtn').disabled=true;setStatus('subtitleStatus','Starting transcription…');
-  try{
-    const r=await fetch('/api/transcribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mediaUrl,sourceLanguage:$('sourceLanguage').value})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Unable to start transcription.');
-    transcriptId=d.transcript.id;const result=await pollTranscript(transcriptId);translatedText=transcriptText;
-    const detected=langMap[result.language]||result.language||null;const target=$('targetLanguage').value;const needsTranslation=Boolean(transcriptText)&&(!detected||detected!==target);
-    if(needsTranslation){setStatus('subtitleStatus',`Transcript ready${detected?` (${detected})`:''}. Translating to ${target}…`);translatedText=await translateText(transcriptText);}
-    const p=(translatedText||transcriptText).slice(0,180);setStatus('subtitleStatus',`Subtitles ready: ${p}${p.length>=180?'…':''}`,true);setStatus('voiceStatus','Translated transcript ready for AI voice.',true);
-  }catch(e){setStatus('subtitleStatus',e.message||'Subtitle generation failed.');}finally{$('subtitleBtn').disabled=false;}
-});
-
-$('voicePreview').addEventListener('click',async()=>{
-  const text=(translatedText||transcriptText||'Welcome to Nexora Video AI. This is a licensed AI voice preview.').slice(0,220);$('voicePreview').disabled=true;setStatus('voiceStatus','Generating voice preview…');
-  try{const u=await generateVoiceAudio(text,false);await new Audio(u).play();setStatus('voiceStatus',`Playing ${$('voiceSelect').value}.`,true);}catch(e){setStatus('voiceStatus',e.message);}finally{$('voicePreview').disabled=false;}
-});
-
-$('generateVoice').addEventListener('click',async()=>{
-  const text=translatedText||transcriptText;if(!text)return setStatus('voiceStatus','Create subtitles first.');$('generateVoice').disabled=true;setStatus('voiceStatus','Generating and saving AI voice…');
-  try{await generateVoiceAudio(text.slice(0,4000),true);setStatus('voiceStatus',`Voice generated in ${$('targetLanguage').value} and saved for rendering.`,true);}catch(e){setStatus('voiceStatus',e.message);}finally{$('generateVoice').disabled=false;}
-});
-
-$('exportBtn').addEventListener('click',async()=>{
-  const videoUrl=$('videoLink').value.trim();if(!currentJob||!videoUrl)return setStatus('exportStatus','Import or upload a video first.');if(!lastVoiceUrl)return setStatus('exportStatus','Generate voice before export.');if(!renderReady)return setStatus('exportStatus','Renderer is not configured yet.');
-  $('exportBtn').disabled=true;setStatus('exportStatus','Sending final render request…');
-  try{
-    const r=await fetch('/api/render',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({videoUrl,voiceUrl:lastVoiceUrl,subtitles:translatedText||transcriptText,quality:$('quality').value,keepMusic:$('keepMusic').checked,separateTracks:$('separateTracks').checked})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Render request failed.');
-    const output=d.render?.outputUrl||d.render?.url||d.render?.downloadUrl||null;
-    if(output){setStatus('exportStatus','Render complete. Tap here to open the MP4.',true);const s=$('exportStatus');s.style.cursor='pointer';s.onclick=()=>window.open(output,'_blank','noopener');}
-    else{const id=d.render?.id||d.render?.jobId||null;if(id){setStatus('exportStatus',`Render job ${id} started…`);await pollRender(id);}else setStatus('exportStatus','Render request submitted successfully.',true);}
-  }catch(e){setStatus('exportStatus',e.message);}finally{$('exportBtn').disabled=false;}
-});
-
-if(!getBackendBase() && location.hostname==='localhost'){
-  setStatus('systemStatus','Android app: enter your deployed backend URL above, then tap Save.');
-}else{
-  fetch('/api/health').then(r=>r.json()).then(d=>{
-    if(!d.ok)return;const c=d.capabilities||{};blobReady=Boolean(c.blobConfigured);renderReady=Boolean(c.renderConfigured);const missing=[];
-    if(!c.transcriptionConfigured)missing.push('Transcription');if(!c.translationConfigured)missing.push('Translation');if(!c.voiceConfigured)missing.push('Voice');if(!c.blobConfigured)missing.push('Storage');if(!c.renderConfigured)missing.push('Renderer');
-    setStatus('systemStatus',d.readyForFullPipeline?'All AI services are connected. Full pipeline ready.':`Setup required: ${missing.join(', ')}.`,d.readyForFullPipeline);
-  }).catch(()=>setStatus('systemStatus','Backend health check unavailable. Check the Backend URL.'));
-}
-
+if(!getBackendBase() && location.hostname==='localhost') setStatus('systemStatus','Android app: enter your deployed backend URL above, then tap Save.');
+else fetch('/api/health').then(r=>r.json()).then(d=>{if(!d.ok)return;const c=d.capabilities||{};blobReady=Boolean(c.blobConfigured);renderReady=Boolean(c.renderConfigured);const missing=[];if(!c.videoAnalysisConfigured)missing.push('Video Analysis');if(!c.translationConfigured)missing.push('Translation');if(!c.voiceConfigured)missing.push('Adam Voice');if(!c.blobConfigured)missing.push('Storage');if(!c.renderConfigured)missing.push('Renderer');setStatus('systemStatus',d.readyForFullPipeline?'All personal AI services are connected.':`Setup required: ${missing.join(', ')}.`,d.readyForFullPipeline);}).catch(()=>setStatus('systemStatus','Backend health check unavailable.'));
 if('serviceWorker'in navigator && location.hostname!=='localhost')window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
