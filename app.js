@@ -4,6 +4,28 @@ const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
 const langMap={en:'English',km:'Khmer',zh:'Chinese',fr:'French',es:'Spanish',de:'German',ru:'Russian',ja:'Japanese',ko:'Korean',th:'Thai',vi:'Vietnamese',id:'Indonesian'};
 let currentJob=null, selectedLocalFile=null, transcriptText='', translatedText='', transcriptId=null, lastVoiceUrl=null, lastVoicePreviewUrl=null, blobReady=false, renderReady=false;
 
+const originalFetch=window.fetch.bind(window);
+const normalizeBase=(v='')=>v.trim().replace(/\/+$/,'');
+const getBackendBase=()=>normalizeBase(localStorage.getItem('nexoraBackendUrl')||'');
+const apiUrl=(path)=>`${getBackendBase()}${path}`;
+window.fetch=(input,init)=>{
+  if(typeof input==='string' && input.startsWith('/api/')) return originalFetch(apiUrl(input),init);
+  return originalFetch(input,init);
+};
+
+const backendInput=$('backendUrl');
+if(backendInput) backendInput.value=getBackendBase();
+$('saveBackendBtn')?.addEventListener('click',()=>{
+  const value=normalizeBase(backendInput?.value||'');
+  if(value){
+    try{const u=new URL(value);if(u.protocol!=='https:'&&u.protocol!=='http:')throw new Error();}
+    catch{return setStatus('systemStatus','Enter a valid backend URL, for example https://your-project.vercel.app');}
+    localStorage.setItem('nexoraBackendUrl',value);
+  }else localStorage.removeItem('nexoraBackendUrl');
+  setStatus('systemStatus','Backend saved. Rechecking services…',true);
+  setTimeout(()=>location.reload(),400);
+});
+
 async function generateVoiceAudio(text,persist=false){
   const response=await fetch('/api/voice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,voice:$('voiceSelect').value,persist})});
   if(!response.ok){let m='Voice generation failed.';try{const d=await response.json();m=d.error||m;}catch{}throw new Error(m);}
@@ -32,7 +54,7 @@ async function uploadPhoneVideo(file){
   const { upload } = await import('https://esm.sh/@vercel/blob@2/client');
   const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
   const result=await upload(`uploads/${Date.now()}-${safeName}`,file,{
-    access:'public',handleUploadUrl:'/api/upload',multipart:true,contentType:file.type||'video/mp4',
+    access:'public',handleUploadUrl:apiUrl('/api/upload'),multipart:true,contentType:file.type||'video/mp4',
     onUploadProgress:({percentage})=>setStatus('sourceStatus',`Uploading from phone… ${Math.round(percentage)}%`)
   });
   return result.url;
@@ -109,10 +131,14 @@ $('exportBtn').addEventListener('click',async()=>{
   }catch(e){setStatus('exportStatus',e.message);}finally{$('exportBtn').disabled=false;}
 });
 
-fetch('/api/health').then(r=>r.json()).then(d=>{
-  if(!d.ok)return;const c=d.capabilities||{};blobReady=Boolean(c.blobConfigured);renderReady=Boolean(c.renderConfigured);const missing=[];
-  if(!c.transcriptionConfigured)missing.push('Transcription');if(!c.translationConfigured)missing.push('Translation');if(!c.voiceConfigured)missing.push('Voice');if(!c.blobConfigured)missing.push('Storage');if(!c.renderConfigured)missing.push('Renderer');
-  setStatus('systemStatus',d.readyForFullPipeline?'All AI services are connected. Full pipeline ready.':`Setup required: ${missing.join(', ')}.`,d.readyForFullPipeline);
-}).catch(()=>setStatus('systemStatus','Backend health check unavailable.'));
+if(!getBackendBase() && location.hostname==='localhost'){
+  setStatus('systemStatus','Android app: enter your deployed backend URL above, then tap Save.');
+}else{
+  fetch('/api/health').then(r=>r.json()).then(d=>{
+    if(!d.ok)return;const c=d.capabilities||{};blobReady=Boolean(c.blobConfigured);renderReady=Boolean(c.renderConfigured);const missing=[];
+    if(!c.transcriptionConfigured)missing.push('Transcription');if(!c.translationConfigured)missing.push('Translation');if(!c.voiceConfigured)missing.push('Voice');if(!c.blobConfigured)missing.push('Storage');if(!c.renderConfigured)missing.push('Renderer');
+    setStatus('systemStatus',d.readyForFullPipeline?'All AI services are connected. Full pipeline ready.':`Setup required: ${missing.join(', ')}.`,d.readyForFullPipeline);
+  }).catch(()=>setStatus('systemStatus','Backend health check unavailable. Check the Backend URL.'));
+}
 
-if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+if('serviceWorker'in navigator && location.hostname!=='localhost')window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
