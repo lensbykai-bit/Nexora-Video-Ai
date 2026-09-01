@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#070814" />
+  <title>Nexora Dub.Ai Plus</title>
+  <link rel="stylesheet" href="desktop.css" />
+</head>
+<body>
+<div class="shell" id="app" data-plan="plus">
+  <header class="topbar">
+    <div class="brand"><div class="logo">N+</div><div><b>Nexora Dub.Ai <span id="planName">Plus</span></b><small>AI Movie Translation & Dubbing Studio</small></div></div>
+    <div class="project"><span>Project:</span><b id="projectName">Untitled Movie</b><span class="chev">⌄</span></div>
+    <div class="top-actions"><span class="saved">● Ready</span><button id="backendBtn">⚙ Backend</button><button class="preview-btn" id="previewBtn">▶ Preview</button><button class="export-top" id="exportTopBtn" disabled>⇧ Export</button></div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav>
+        <button class="nav-item"><span>⌂</span><div><b>ផ្ទាំងគ្រប់គ្រង</b><small>Dashboard</small></div></button>
+        <button class="nav-item active"><span>文</span><div><b>បកប្រែ</b><small>Translate</small></div></button>
+        <button class="nav-item"><span>◉</span><div><b>សម្លេង</b><small>Voice Dubbing</small></div></button>
+        <button class="nav-item"><span>CC</span><div><b>Subtitle</b><small>Subtitle Editor</small></div></button>
+        <button class="nav-item"><span>▣</span><div><b>មេឌៀ</b><small>Media</small></div></button>
+        <button class="nav-item"><span>□</span><div><b>គម្រោង</b><small>Projects</small></div></button>
+        <button class="nav-item"><span>⚙</span><div><b>ការកំណត់</b><small>Settings</small></div></button>
+      </nav>
+      <div class="plan-card">
+        <div class="plan-switch"><button data-plan-choice="free">FREE</button><button class="active" data-plan-choice="plus">PLUS</button></div>
+        <div class="orb">AI</div><b>Nexora Neural Hub</b><small id="planText">Premium tools active</small>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <section class="viewer-card">
+        <div class="viewer-head"><span class="tag">Original</span><div><label class="upload-small" for="videoFile">＋ Add Video</label><input id="videoFile" type="file" accept="video/*" hidden><span class="quality" id="qualityBadge">1080p</span></div></div>
+        <div class="viewer" id="viewer">
+          <div class="empty-view"><div class="film-icon">▶</div><h2>Upload your movie or video</h2><p>MP4 · MOV · WebM · M4V</p><label for="videoFile" class="primary">Choose Video</label></div>
+        </div>
+        <div class="playerbar"><button id="playBtn">▶</button><div class="progress"><span></span></div><time id="timecode">00:00:00 / 00:00:00</time><button>CC</button><button>⚙</button><button>⛶</button></div>
+        <div class="status" id="statusLine">Ready — choose a video to begin.</div>
+      </section>
+
+      <section class="timeline-card">
+        <div class="timeline-head"><b>Timeline</b><div><button>✂ Split</button><button>▱ Delete</button><button class="auto">Auto Sync ●</button></div></div>
+        <div class="ruler"><span>00:00</span><span>00:15</span><span>00:30</span><span>00:45</span><span>01:00</span></div>
+        <div class="track"><label>CC Subtitle (OR)</label><div class="segments"><i></i><i></i><i></i><i></i></div></div>
+        <div class="track"><label>CC Subtitle (TR)</label><div class="segments pink"><i></i><i></i><i></i><i></i></div></div>
+        <div class="track"><label>🎙 Dubbing</label><div class="wave pinkwave"></div></div>
+        <div class="track"><label>♫ Original Audio</label><div class="wave bluewave"></div></div>
+        <div class="track plus-only"><label>♫ Background</label><div class="wave purplewave"></div></div>
+        <div class="transport"><button>⏮</button><button>◀</button><button class="play-main">▶</button><button>▶</button><button>⏭</button></div>
+      </section>
+    </main>
+
+    <aside class="rightbar">
+      <section class="panel translate-panel">
+        <div class="tabs"><button class="active">បកប្រែ Translate</button><button>CC Subtitle</button></div>
+        <div class="lang-row"><select id="sourceLanguage"><option value="auto">Auto Detect</option><option>English</option><option>Khmer</option><option>Chinese</option><option>Korean</option><option>Japanese</option><option>Thai</option><option>Vietnamese</option></select><button id="swapBtn">⇄</button><select id="targetLanguage"><option>Khmer</option><option>English</option><option>Chinese</option><option>French</option><option>Spanish</option><option>German</option><option>Russian</option><option>Japanese</option><option>Korean</option><option>Thai</option><option>Vietnamese</option><option>Indonesian</option></select></div>
+        <div class="translate-actions"><button id="transcribeBtn" disabled>CC Extract Subtitle</button><button class="accent" id="translateBtn" disabled>文 Translate</button></div>
+        <label class="editor-label">Original Subtitle<textarea id="originalText" placeholder="Original speech / subtitle appears here..."></textarea></label>
+        <label class="editor-label">Translated Subtitle <span id="translatedLang">Khmer</span><textarea id="translatedText" placeholder="Translated subtitle appears here..."></textarea></label>
+      </section>
+
+      <section class="panel voice-panel">
+        <div class="panel-title"><div><b>សម្លេង Voice Dubbing</b><small id="voiceBadge">PLUS PREMIUM</small></div><span>AI Voice Library</span></div>
+        <div class="voice-list" id="voiceList"></div>
+        <div class="voice-actions"><button class="accent" id="voiceBtn" disabled>🎙 Generate Voice</button><audio id="voicePreview" controls preload="none"></audio></div>
+      </section>
+
+      <section class="panel export-panel"><div><b>Final Export</b><small id="exportHint">Plus: 1080p, separate tracks</small></div><button class="export" id="exportBtn" disabled>Export 1080p</button></section>
+    </aside>
+  </div>
+</div>
+
+<dialog id="backendDialog"><form method="dialog" class="dialog-card"><div class="dialog-head"><b>Backend Connection</b><button value="cancel">✕</button></div><p>Connect the Nexora backend used for Upload, Subtitle, Translation, Voice and Render.</p><label>Backend URL<input id="backendUrl" type="url" placeholder="https://your-nexora-backend.vercel.app"></label><button id="saveBackendBtn" value="default" class="primary wide">Save Backend</button><button id="clearBackendBtn" value="default" class="ghost wide">Clear saved URL</button></form></dialog>
+<script src="desktop.js"></script>
+</body>
+</html>
