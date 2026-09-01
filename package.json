@@ -1,13 +1,16 @@
 {
-  "name": "nexora-narrator",
-  "version": "2.0.0",
+  "name": "nexora-dub-ai",
+  "version": "2.2.0",
   "private": true,
+  "main": "electron-main.cjs",
   "engines": { "node": ">=20" },
   "scripts": {
     "prepare:www": "node scripts/prepare-www.js",
     "android:add": "npx cap add android",
     "android:sync": "npm run prepare:www && npx cap sync android",
-    "android:build": "npm run android:sync && cd android && ./gradlew assembleDebug"
+    "android:build": "npm run android:sync && cd android && ./gradlew assembleDebug",
+    "desktop:start": "electron .",
+    "desktop:win": "electron-builder --win portable zip --x64"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",
@@ -15,6 +18,24 @@
     "@vercel/blob": "latest"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.4.3"
+    "@capacitor/cli": "^7.4.3",
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.nexora.dubai.desktop",
+    "productName": "Nexora Dub.Ai Plus",
+    "asar": true,
+    "files": [
+      "desktop.html",
+      "desktop.css",
+      "desktop.js",
+      "electron-main.cjs",
+      "package.json"
+    ],
+    "artifactName": "Nexora-Dub-Ai-Plus-v${version}-Windows-${arch}.${ext}",
+    "win": {
+      "target": ["portable", "zip"]
+    }
   }
 }
