@@ -1,11 +1,11 @@
 {
-  "name": "Nexora Video AI",
-  "short_name": "Nexora AI",
-  "description": "Mobile-first AI video dubbing, subtitles and voice workflow.",
+  "name": "Nexora Dub.Ai",
+  "short_name": "Nexora Dub",
+  "description": "AI video translation, subtitles and voice dubbing with Nexora Free and Nexora Plus modes.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#090b12",
-  "theme_color": "#090b12",
+  "background_color": "#070814",
+  "theme_color": "#080914",
   "orientation": "portrait-primary",
   "icons": [
     {
