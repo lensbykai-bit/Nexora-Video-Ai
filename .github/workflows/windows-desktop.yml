@@ -1,0 +1,43 @@
+name: Build Nexora Dub.Ai Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'desktop.html'
+      - 'desktop.css'
+      - 'desktop.js'
+      - 'electron-main.cjs'
+      - 'package.json'
+      - '.github/workflows/windows-desktop.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install
+      - name: Build portable Windows app
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run desktop:win
+      - name: Show build output
+        shell: pwsh
+        run: Get-ChildItem -Path dist -Recurse | Select-Object FullName,Length
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Nexora-Dub-Ai-Plus-Windows-v2.2
+          path: |
+            dist/*.exe
+            dist/*.zip
+          if-no-files-found: error
+          retention-days: 30
