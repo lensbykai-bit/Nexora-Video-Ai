@@ -1,4 +1,4 @@
-name: Build Nexora Narrator Android APK
+name: Build Nexora Dub.Ai Android APK
 
 on:
   workflow_dispatch:
@@ -45,18 +45,18 @@ jobs:
           chmod +x ./gradlew
           ./gradlew assembleDebug
       - name: Rename APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk Nexora-Narrator-v2.0-debug.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Nexora-Dub-Ai-Free-Plus-v2.1-debug.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: Nexora-Narrator-v2.0-APK
-          path: Nexora-Narrator-v2.0-debug.apk
+          name: Nexora-Dub-Ai-Free-Plus-v2.1-APK
+          path: Nexora-Dub-Ai-Free-Plus-v2.1-debug.apk
           retention-days: 30
       - name: Commit APK into repository
         run: |
           mkdir -p apk
-          cp Nexora-Narrator-v2.0-debug.apk apk/Nexora-Narrator-v2.0-debug.apk
+          cp Nexora-Dub-Ai-Free-Plus-v2.1-debug.apk apk/Nexora-Dub-Ai-Free-Plus-v2.1-debug.apk
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apk/Nexora-Narrator-v2.0-debug.apk
-          git commit -m "Add Nexora Narrator v2.0 APK build ${GITHUB_RUN_NUMBER}" || exit 0
+          git add apk/Nexora-Dub-Ai-Free-Plus-v2.1-debug.apk
+          git commit -m "Add Nexora Dub.Ai Free Plus APK build ${GITHUB_RUN_NUMBER}" || exit 0
           git push
