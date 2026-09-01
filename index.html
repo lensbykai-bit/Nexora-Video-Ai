@@ -3,60 +3,166 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#05070b" />
-  <title>Nexora Narrator</title>
+  <meta name="theme-color" content="#080914" />
+  <title>Nexora Dub.Ai</title>
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="studio">
-    <header class="studio-head">
-      <div>
-        <span class="kicker">PRIVATE VIDEO NARRATOR</span>
-        <h1>Nexora Narrator</h1>
+  <div class="app" id="app" data-plan="free">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">N+</div>
+        <div>
+          <div class="brand-name">Nexora <span id="planName">Free</span></div>
+          <div class="brand-sub">AI Video Translation & Dubbing</div>
+        </div>
       </div>
-      <span class="pill">NEW v2.0</span>
+      <button class="icon-btn" id="backendBtn" aria-label="Backend settings">⚙</button>
     </header>
 
-    <section class="viewer" id="viewer">
-      <div class="empty-view" id="emptyView">
-        <div class="upload-icon">＋</div>
-        <strong>Choose your video</strong>
-        <span>AI will watch it and write narration for you</span>
-        <label class="choose-btn" for="videoFile">Select Video</label>
-        <input id="videoFile" type="file" accept="video/*" hidden />
+    <section class="plan-switch" aria-label="Plan selector">
+      <button class="plan-tab active" data-plan-choice="free">
+        <span class="plan-dot"></span>
+        <b>Nexora Free</b>
+        <small>Basic translation</small>
+      </button>
+      <button class="plan-tab" data-plan-choice="plus">
+        <span class="crown">♛</span>
+        <b>Nexora Plus</b>
+        <small>Full dubbing studio</small>
+      </button>
+    </section>
+
+    <section class="hero-card">
+      <div class="hero-head">
+        <div>
+          <span class="eyebrow" id="planBadge">FREE</span>
+          <h1 id="heroTitle">បកប្រែវីដេអូ និង Subtitle</h1>
+          <p id="heroText">ចាប់ផ្តើមបកប្រែវីដេអូបានលឿន សាមញ្ញ និងងាយប្រើ។</p>
+        </div>
+        <span class="quality" id="qualityBadge">720p</span>
+      </div>
+
+      <div class="viewer" id="viewer">
+        <div class="empty-view" id="emptyView">
+          <div class="upload-ring">＋</div>
+          <strong>Upload Movie / Video</strong>
+          <span>MP4 · MOV · WebM · M4V</span>
+          <label class="primary-btn upload-btn" for="videoFile">ជ្រើសរើសវីដេអូ</label>
+          <input id="videoFile" type="file" accept="video/*" hidden />
+        </div>
+      </div>
+      <div class="status" id="statusLine">មិនទាន់មានវីដេអូ</div>
+    </section>
+
+    <section class="glass workflow-card">
+      <div class="section-title">
+        <div><span class="step-kicker">01</span><h2>Language & Translation</h2></div>
+        <span class="mini-badge" id="modeBadge">FREE MODE</span>
+      </div>
+      <div class="language-grid">
+        <label>Source language
+          <select id="sourceLanguage">
+            <option value="auto">Auto Detect</option>
+            <option value="English">English</option>
+            <option value="Khmer">Khmer</option>
+            <option value="Chinese">Chinese</option>
+            <option value="Korean">Korean</option>
+            <option value="Japanese">Japanese</option>
+            <option value="Thai">Thai</option>
+            <option value="Vietnamese">Vietnamese</option>
+          </select>
+        </label>
+        <label>Translate to
+          <select id="targetLanguage">
+            <option>Khmer</option>
+            <option>English</option>
+            <option>Chinese</option>
+            <option>French</option>
+            <option>Spanish</option>
+            <option>German</option>
+            <option>Russian</option>
+            <option>Japanese</option>
+            <option>Korean</option>
+            <option>Thai</option>
+            <option>Vietnamese</option>
+            <option>Indonesian</option>
+          </select>
+        </label>
+      </div>
+      <div class="action-grid three">
+        <button id="transcribeBtn" class="action-btn" disabled><span>CC</span><b>Extract Subtitle</b><small>Speech → text</small></button>
+        <button id="translateBtn" class="action-btn" disabled><span>文</span><b>Translate</b><small>AI translation</small></button>
+        <button id="swapBtn" class="action-btn compact"><span>⇄</span><b>Swap</b><small>Languages</small></button>
       </div>
     </section>
 
-    <section class="control-dock">
-      <div class="progress-line">
-        <span class="dot active"></span><span></span><span class="dot"></span><span></span><span class="dot"></span><span></span><span class="dot"></span>
-      </div>
-      <div class="status-line" id="statusLine">No video selected</div>
-
-      <div class="action-grid">
-        <button id="analyzeBtn" class="big-action" disabled>
-          <b>01</b><span>Analyze Video</span><small>AI understands the scene</small>
-        </button>
-        <button id="voiceBtn" class="big-action" disabled>
-          <b>02</b><span>Adam Voice</span><small>Generate narration</small>
-        </button>
-      </div>
-
-      <div class="editor-panel">
-        <div class="panel-head"><strong>Narration Script</strong><button id="rewriteBtn" class="ghost" disabled>Rewrite</button></div>
-        <textarea id="scriptEditor" placeholder="Your AI narration will appear here..."></textarea>
-      </div>
-
-      <div class="language-row">
-        <div><label>Language</label><select id="targetLanguage"><option>English</option><option>Khmer</option><option>Chinese</option><option>French</option><option>Spanish</option><option>German</option><option>Japanese</option><option>Korean</option><option>Thai</option><option>Vietnamese</option></select></div>
-        <div><label>Subtitle</label><select id="subtitleMode"><option value="on">On</option><option value="off">Off</option></select></div>
-      </div>
-
-      <button id="exportBtn" class="export-btn" disabled>Export Final MP4</button>
-      <div class="mini-note">Personal use only · Your video stays under your control.</div>
+    <section class="editor-grid">
+      <article class="glass editor-card">
+        <div class="panel-head"><strong>Original Subtitle</strong><button class="text-btn" id="clearOriginalBtn">Clear</button></div>
+        <textarea id="originalText" placeholder="Original speech / subtitle will appear here..."></textarea>
+      </article>
+      <article class="glass editor-card translated">
+        <div class="panel-head"><strong>Translated Subtitle</strong><span id="translatedLang">Khmer</span></div>
+        <textarea id="translatedText" placeholder="Translated subtitle will appear here..."></textarea>
+      </article>
     </section>
+
+    <section class="glass voice-card">
+      <div class="section-title">
+        <div><span class="step-kicker">02</span><h2>AI Voice Dubbing</h2></div>
+        <span class="mini-badge premium-badge" id="voiceAccessBadge">LIMITED</span>
+      </div>
+      <div class="voice-list" id="voiceList"></div>
+      <div class="voice-controls">
+        <button id="voiceBtn" class="primary-btn" disabled>🎙 Generate Voice</button>
+        <audio id="voicePreview" controls preload="none"></audio>
+      </div>
+      <div class="locked-note" id="lockedNote">Nexora Plus បើក Premium AI Voices, Lip Sync និងគម្រោងគ្មានកំណត់។</div>
+    </section>
+
+    <section class="glass timeline-card">
+      <div class="section-title">
+        <div><span class="step-kicker">03</span><h2>Timeline Preview</h2></div>
+        <span class="auto-pill">AUTO SYNC</span>
+      </div>
+      <div class="timeline-ruler"><span>00:00</span><span>00:15</span><span>00:30</span><span>00:45</span><span>01:00</span></div>
+      <div class="track"><b>Subtitle</b><div class="blocks"><span></span><span></span><span></span><span></span></div></div>
+      <div class="track"><b>Voice</b><div class="wave" id="voiceWave"></div></div>
+      <div class="track plus-track" id="musicTrack"><b>Music</b><div class="wave purple"></div></div>
+    </section>
+
+    <section class="glass export-card">
+      <div>
+        <span class="step-kicker">04</span>
+        <h2>Export Video</h2>
+        <p id="exportHint">Free plan exports up to 720p.</p>
+      </div>
+      <button id="exportBtn" class="export-btn" disabled>Export 720p</button>
+    </section>
+
+    <section class="compare-card">
+      <div class="compare-head"><h2>Nexora Free vs Nexora Plus</h2><p>អាចប្តូររវាង plan ដើម្បីសាកល្បង UI មុនពេលភ្ជាប់ប្រព័ន្ធ subscription។</p></div>
+      <div class="compare-grid">
+        <article><span class="free-tag">FREE</span><h3>Nexora Free</h3><ul><li>Basic Translation</li><li>Auto Subtitle</li><li>2 AI Voices</li><li>720p Export</li><li>3 Projects</li></ul></article>
+        <article class="plus-plan"><span class="plus-tag">PLUS</span><h3>Nexora Plus</h3><ul><li>Advanced Dubbing</li><li>Premium AI Voices</li><li>Lip Sync UI</li><li>1080p Export</li><li>Unlimited Projects</li></ul></article>
+      </div>
+    </section>
+
+    <footer>Nexora Dub.Ai · Android APK prototype</footer>
   </div>
+
+  <dialog id="backendDialog">
+    <form method="dialog" class="dialog-card">
+      <div class="panel-head"><strong>Backend Connection</strong><button value="cancel" class="icon-btn">✕</button></div>
+      <p>ដាក់ URL backend Vercel របស់ Nexora ដើម្បីអោយ Upload, Translate, Voice និង Export ដំណើរការ។</p>
+      <label>Backend URL<input id="backendUrl" type="url" placeholder="https://your-project.vercel.app" /></label>
+      <button id="saveBackendBtn" value="default" class="primary-btn">Save Backend</button>
+      <button id="clearBackendBtn" value="default" class="ghost-btn">Clear saved URL</button>
+    </form>
+  </dialog>
+
   <script src="bootstrap.js"></script>
   <script src="studio.js"></script>
 </body>
