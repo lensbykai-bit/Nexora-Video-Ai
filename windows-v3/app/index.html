@@ -20,7 +20,7 @@
       <div class="top-actions">
         <span class="saved-dot">● Saved</span>
         <button class="ghost" id="previewBtn">▶ Preview</button>
-        <button class="primary" id="exportBtn">⇧ Export</button>
+        <button class="primary" id="exportBtn">⇧ Export SRT</button>
       </div>
     </header>
 
@@ -37,8 +37,8 @@
         <div class="engine-card">
           <div class="orb">✦</div>
           <strong>AI Engine</strong>
-          <small>Nexora Neural Hub</small>
-          <span class="online">● Active</span>
+          <small>Gemini Video + Translation</small>
+          <span class="online">● Ready</span>
         </div>
         <button class="nav-item" id="settingsBtn"><span>⚙</span><b>Settings</b><small>ការកំណត់</small></button>
       </div>
@@ -72,7 +72,7 @@
         </div>
         <div class="language-row">
           <select id="sourceLanguage">
-            <option>Auto Detect</option><option>Chinese</option><option>English</option><option>Thai</option><option>Korean</option><option>Japanese</option><option>Vietnamese</option>
+            <option>Auto Detect</option><option>Chinese</option><option>English</option><option>Thai</option><option>Korean</option><option>Japanese</option><option>Vietnamese</option><option>Khmer</option>
           </select>
           <span>⇄</span>
           <select id="targetLanguage">
@@ -80,7 +80,10 @@
           </select>
         </div>
         <div class="translate-toolbar">
-          <button class="primary grow" id="translateBtn">✦ Translate All</button>
+          <button class="primary grow" id="analyzeVideoBtn">✦ Auto Subtitle + Translate Video</button>
+        </div>
+        <div class="translate-toolbar">
+          <button class="ghost grow" id="translateBtn">Translate Existing Subtitle</button>
           <button class="ghost" id="addSubtitleBtn">＋ Add</button>
         </div>
         <div class="subtitle-list" id="subtitleList"></div>
@@ -109,9 +112,9 @@
         </div>
         <div class="field-label">Target Language</div>
         <select class="full"><option>🇰🇭 Khmer</option><option>🇺🇸 English</option><option>🇨🇳 Chinese</option></select>
-        <div class="field-label">AI Voice</div>
+        <div class="field-label">Voice Preview</div>
         <div class="voice-list" id="voiceList">
-          <button class="voice active" data-voice="Sovann"><span class="avatar">S</span><span><b>Sovann</b><small>Male · Deep · Natural</small></span><i>Premium</i></button>
+          <button class="voice active" data-voice="Sovann"><span class="avatar">S</span><span><b>Sovann</b><small>Male · Deep · Natural</small></span><i>Local</i></button>
           <button class="voice" data-voice="Dara"><span class="avatar">D</span><span><b>Dara</b><small>Female · Warm · Clear</small></span></button>
           <button class="voice" data-voice="Pheakdey"><span class="avatar">P</span><span><b>Pheakdey</b><small>Male · Young · Energetic</small></span></button>
           <button class="voice" data-voice="Sreynich"><span class="avatar">S</span><span><b>Sreynich</b><small>Female · Soft · Emotional</small></span></button>
@@ -122,10 +125,10 @@
     </main>
 
     <footer class="statusbar">
-      <div><strong>Nexora Dub.Ai Plus</strong><small>v3.0 Windows</small></div>
-      <div><strong>AI Translation</strong><small id="modelStatus">Gemini model</small></div>
-      <div><strong>Neural Dubbing</strong><small>Local voice preview</small></div>
-      <div><strong>Lip Sync</strong><small>Pipeline ready</small></div>
+      <div><strong>Nexora Dub.Ai Plus</strong><small>v3.2 Windows</small></div>
+      <div><strong>AI Video Analysis</strong><small id="modelStatus">Gemini model</small></div>
+      <div><strong>Auto Subtitle</strong><small>Real video dialogue + timestamps</small></div>
+      <div><strong>Khmer Translation</strong><small>Gemini translation pipeline</small></div>
     </footer>
   </div>
 
@@ -134,8 +137,8 @@
       <div class="modal-head"><h2>⚙ AI Settings</h2><button value="cancel">✕</button></div>
       <label>Gemini API Key<input id="apiKey" type="password" placeholder="Paste your Gemini API key" /></label>
       <label>Gemini Model<input id="modelName" list="models" placeholder="gemini-2.5-flash" /></label>
-      <datalist id="models"><option value="gemini-2.5-flash"></option><option value="gemini-2.5-pro"></option><option value="gemini-2.0-flash"></option></datalist>
-      <p class="hint">API key is stored only in this Windows app's local user-data folder.</p>
+      <datalist id="models"><option value="gemini-2.5-flash"></option><option value="gemini-2.5-pro"></option><option value="gemini-3.5-flash"></option><option value="gemini-3.8-flash"></option></datalist>
+      <p class="hint">Auto Subtitle uploads the selected video to Gemini for speech/timestamp analysis. Uploaded analysis files are deleted by Nexora after the request finishes. Your API key stays in this Windows app's local user-data folder.</p>
       <div class="modal-actions"><button value="cancel" class="ghost">Cancel</button><button type="button" class="primary" id="saveSettingsBtn">Save Settings</button></div>
     </form>
   </dialog>
