@@ -16,11 +16,19 @@ const clipLabel = document.getElementById('clipLabel');
 const toast = document.getElementById('toast');
 const settingsDialog = document.getElementById('settingsDialog');
 const modelStatus = document.getElementById('modelStatus');
+const workflowSteps = Array.from(document.querySelectorAll('.step'));
 
 let subtitles = [];
 let selectedVoice = 'Sovann';
 let currentVideoPath = null;
 let currentVideoName = 'Untitled Movie';
+
+function setStep(stepNumber) {
+  workflowSteps.forEach((step, index) => {
+    step.classList.toggle('active', index === stepNumber - 1);
+    step.classList.toggle('done', index < stepNumber - 1);
+  });
+}
 
 function notify(message, isError = false) {
   toast.textContent = message;
@@ -78,9 +86,9 @@ function renderSubtitles() {
 
   if (!subtitles.length) {
     const empty = document.createElement('div');
-    empty.style.cssText = 'padding:22px 12px;color:#7f89a7;text-align:center;font-size:12px;line-height:1.7';
+    empty.style.cssText = 'padding:30px 12px;color:#7f89a7;text-align:center;font-size:12px;line-height:1.8';
     empty.innerHTML = currentVideoPath
-      ? 'No subtitles yet.<br><b style="color:#cfd5ef">Click “Auto Subtitle + Translate Video”.</b>'
+      ? 'No subtitles yet.<br><b style="color:#cfd5ef">Click “Auto Subtitle + Translate”.</b>'
       : 'Open a video first.';
     subtitleList.appendChild(empty);
     return;
@@ -154,7 +162,8 @@ async function loadVideo() {
     subtitles = [];
     renderSubtitles();
     subtitleOverlay.textContent = '';
-    notify('Video loaded. Now click Auto Subtitle + Translate Video.');
+    setStep(2);
+    notify('Video loaded. Next: click Auto Subtitle + Translate.');
   } catch (err) { notify(err.message || String(err), true); }
 }
 
@@ -165,7 +174,7 @@ document.getElementById('playBtn').addEventListener('click', () => video.paused 
 video.addEventListener('timeupdate', () => {
   const p = video.duration ? video.currentTime / video.duration : 0;
   progressFill.style.width = `${p * 100}%`;
-  playhead.style.left = `calc(145px + (100% - 155px) * ${p})`;
+  playhead.style.left = `calc(90px + (100% - 100px) * ${p})`;
   timeReadout.textContent = `${fmt(video.currentTime)} / ${fmt(video.duration)}`;
   updateOverlay();
 });
@@ -182,6 +191,7 @@ importSrtBtn.addEventListener('click', async () => {
     if (!parsed.length) throw new Error('No valid subtitle blocks were found.');
     subtitles = parsed;
     renderSubtitles();
+    setStep(3);
     notify(`Imported ${parsed.length} subtitle lines`);
   } catch (err) { notify(err.message || String(err), true); }
 });
@@ -212,11 +222,12 @@ analyzeVideoBtn.addEventListener('click', async () => {
     const match = Array.from(sourceSelect.options).find(o => o.value.toLowerCase() === detected.toLowerCase() || o.text.toLowerCase() === detected.toLowerCase());
     if (match) sourceSelect.value = match.value;
 
-    notify(`Ready — ${subtitles.length} real subtitle lines created and translated.`);
+    setStep(3);
+    notify(`Ready — ${subtitles.length} subtitle lines created and translated.`);
     analyzeVideoBtn.textContent = old;
   } catch (err) {
     notify(err.message || String(err), true);
-    analyzeVideoBtn.textContent = '✦ Auto Subtitle + Translate Video';
+    analyzeVideoBtn.textContent = '✨ Auto Subtitle + Translate';
   } finally {
     analyzeVideoBtn.disabled = false;
   }
@@ -233,6 +244,7 @@ document.getElementById('addSubtitleBtn').addEventListener('click', () => {
   const start = subtitles.length ? subtitles[subtitles.length - 1].end : (video.currentTime || 0);
   subtitles.push({ start, end: start + 3, source: 'New subtitle', target: '' });
   renderSubtitles();
+  setStep(3);
 });
 
 document.getElementById('deleteBtn').addEventListener('click', () => {
@@ -264,6 +276,7 @@ translateBtn.addEventListener('click', async () => {
     subtitles = subtitles.map((s, i) => ({ ...s, target: translated[i] || '' }));
     renderSubtitles();
     updateOverlay();
+    setStep(3);
     notify('Translation complete');
   } catch (err) { notify(err.message || String(err), true); }
   finally { translateBtn.disabled = false; translateBtn.textContent = old; }
@@ -274,7 +287,10 @@ document.getElementById('exportBtn').addEventListener('click', async () => {
   try {
     const safeName = (projectName.textContent || 'translated').replace(/[<>:"/\\|?*]+/g, '-');
     const saved = await window.nexora.saveSrt({ name: `${safeName}-khmer.srt`, text: toSrt() });
-    if (saved) notify('Translated SRT exported successfully');
+    if (saved) {
+      setStep(4);
+      notify('Translated SRT exported successfully');
+    }
   } catch (err) { notify(err.message || String(err), true); }
 });
 
@@ -313,6 +329,7 @@ document.getElementById('voicePreviewBtn').addEventListener('click', () => {
 
 (async function init(){
   renderSubtitles();
+  setStep(1);
   try {
     const cfg = await window.nexora.getConfig();
     modelStatus.textContent = cfg.model || 'Gemini';
