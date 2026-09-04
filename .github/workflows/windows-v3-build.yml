@@ -1,4 +1,4 @@
-name: Build Nexora Dub.Ai Windows v3.1 Clean
+name: Build Nexora Dub.Ai Windows v3.2 Usable
 
 on:
   push:
@@ -26,6 +26,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Syntax check Electron files
+        run: |
+          node --check electron/main.js
+          node --check electron/preload.js
+          node --check app/app.js
+
       - name: Build clean Windows folder
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
@@ -34,14 +40,14 @@ jobs:
       - name: Create clean ZIP and checksums
         shell: pwsh
         run: |
-          $zip = "Nexora-Dub-Ai-Plus-v3.1-Windows-Clean.zip"
+          $zip = "Nexora-Dub-Ai-Plus-v3.2-Windows-Clean.zip"
           if (Test-Path $zip) { Remove-Item $zip -Force }
           Compress-Archive -Path "dist/win-unpacked/*" -DestinationPath $zip -CompressionLevel Optimal
           $exe = "dist/win-unpacked/Nexora Dub.Ai Plus.exe"
           $exeHash = (Get-FileHash $exe -Algorithm SHA256).Hash
           $zipHash = (Get-FileHash $zip -Algorithm SHA256).Hash
           @(
-            "Nexora Dub.Ai Plus v3.1 Windows Clean Build",
+            "Nexora Dub.Ai Plus v3.2 Windows Clean Build",
             "",
             "SHA256  Nexora Dub.Ai Plus.exe",
             $exeHash,
@@ -49,21 +55,21 @@ jobs:
             "SHA256  $zip",
             $zipHash,
             "",
-            "This package is an unpacked Electron desktop build. It does not use an NSIS portable/self-extracting wrapper."
+            "v3.2 removes demo subtitles and adds real Gemini video upload, speech/timestamp extraction, and Khmer translation."
           ) | Set-Content -Path "CHECKSUMS-SHA256.txt" -Encoding UTF8
 
       - name: Show output
         run: |
           Get-ChildItem -Path dist/win-unpacked -Recurse | Select-Object FullName,Length
-          Get-Item Nexora-Dub-Ai-Plus-v3.1-Windows-Clean.zip | Select-Object FullName,Length
+          Get-Item Nexora-Dub-Ai-Plus-v3.2-Windows-Clean.zip | Select-Object FullName,Length
           Get-Content CHECKSUMS-SHA256.txt
 
       - name: Upload Windows clean package
         uses: actions/upload-artifact@v4
         with:
-          name: Nexora-Dub-Ai-Plus-Windows-v3.1-Clean
+          name: Nexora-Dub-Ai-Plus-Windows-v3.2-Usable
           path: |
-            windows-v3/Nexora-Dub-Ai-Plus-v3.1-Windows-Clean.zip
+            windows-v3/Nexora-Dub-Ai-Plus-v3.2-Windows-Clean.zip
             windows-v3/CHECKSUMS-SHA256.txt
           if-no-files-found: error
           retention-days: 30
