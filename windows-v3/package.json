@@ -1,12 +1,13 @@
 {
   "name": "nexora-dub-ai-windows-v3",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "private": true,
   "description": "Nexora Dub.Ai Plus Windows desktop studio",
+  "author": "Nexora",
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
-    "build:win": "electron-builder --win portable zip --x64"
+    "build:win:clean": "electron-builder --win dir --x64"
   },
   "devDependencies": {
     "electron": "^38.8.6",
@@ -15,6 +16,7 @@
   "build": {
     "appId": "ai.nexora.dub.windows",
     "productName": "Nexora Dub.Ai Plus",
+    "copyright": "Copyright © 2026 Nexora",
     "directories": {
       "output": "dist"
     },
@@ -25,8 +27,8 @@
     ],
     "asar": true,
     "win": {
-      "target": ["portable", "zip"],
-      "artifactName": "Nexora-Dub-Ai-Plus-v${version}-Windows-x64.${ext}"
+      "target": ["dir"],
+      "requestedExecutionLevel": "asInvoker"
     }
   }
 }
