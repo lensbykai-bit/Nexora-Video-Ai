@@ -13,46 +13,37 @@
         <div class="brand-mark">N</div>
         <div>
           <div class="brand">Nexora Dub.Ai <span>Plus</span></div>
-          <div class="brand-sub">AI Movie Translation & Dubbing Studio</div>
+          <div class="brand-sub">Simple AI Movie Translation Studio</div>
         </div>
       </div>
-      <div class="project-box">Project: <strong id="projectName">Untitled Movie</strong></div>
+      <div class="project-pill">Project: <strong id="projectName">Untitled Movie</strong></div>
       <div class="top-actions">
-        <span class="saved-dot">● Saved</span>
+        <button class="ghost" id="settingsBtn">⚙ Settings</button>
         <button class="ghost" id="previewBtn">▶ Preview</button>
-        <button class="primary" id="exportBtn">⇧ Export SRT</button>
+        <button class="primary" id="exportBtn">Export SRT</button>
       </div>
     </header>
 
-    <aside class="sidebar">
-      <nav>
-        <button class="nav-item"><span>⌂</span><b>Dashboard</b><small>ទំព័រដើម</small></button>
-        <button class="nav-item active"><span>文</span><b>Translate</b><small>បកប្រែ</small></button>
-        <button class="nav-item"><span>🎙</span><b>Voice Dubbing</b><small>សម្រាយសម្លេង</small></button>
-        <button class="nav-item"><span>CC</span><b>Subtitle</b><small>អក្សររត់</small></button>
-        <button class="nav-item"><span>▣</span><b>Media</b><small>មេឌៀ</small></button>
-        <button class="nav-item"><span>▤</span><b>Projects</b><small>គម្រោង</small></button>
-      </nav>
-      <div class="sidebar-bottom">
-        <div class="engine-card">
-          <div class="orb">✦</div>
-          <strong>AI Engine</strong>
-          <small>Gemini Video + Translation</small>
-          <span class="online">● Ready</span>
-        </div>
-        <button class="nav-item" id="settingsBtn"><span>⚙</span><b>Settings</b><small>ការកំណត់</small></button>
-      </div>
-    </aside>
+    <section class="stepbar">
+      <div class="step active"><span>1</span><div><b>Open Video</b><small>បើកវីដេអូ</small></div></div>
+      <div class="step"><span>2</span><div><b>AI Translate</b><small>ចាប់សម្លេង + បកប្រែ</small></div></div>
+      <div class="step"><span>3</span><div><b>Review</b><small>ពិនិត្យ និងកែ</small></div></div>
+      <div class="step"><span>4</span><div><b>Export</b><small>រក្សាទុក SRT</small></div></div>
+    </section>
 
     <main class="workspace">
-      <section class="preview-card panel">
+      <section class="video-card panel">
+        <div class="section-title">
+          <div><span class="eyebrow">STEP 1</span><h2>Video Preview</h2></div>
+          <div class="model-chip">AI: <span id="modelStatus">Gemini model</span></div>
+        </div>
         <div class="video-stage" id="dropZone">
           <video id="video" controls></video>
           <div class="empty-state" id="emptyState">
             <div class="upload-icon">＋</div>
-            <h2>Open your movie or drama</h2>
+            <h2>Choose your movie or drama</h2>
             <p>MP4 · MOV · MKV · WEBM · AVI</p>
-            <button class="primary" id="openVideoBtn">Open Video</button>
+            <button class="primary big" id="openVideoBtn">📁 Open Video</button>
           </div>
           <div class="subtitle-overlay" id="subtitleOverlay"></div>
           <div class="stage-badge">Original</div>
@@ -61,75 +52,102 @@
           <button id="playBtn">▶</button>
           <div class="progress"><div id="progressFill"></div></div>
           <span id="timeReadout">00:00 / 00:00</span>
-          <button id="importSrtBtn">Import SRT</button>
+          <button class="ghost small" id="importSrtBtn">Import SRT</button>
         </div>
       </section>
 
-      <section class="translate-card panel">
-        <div class="panel-tabs">
-          <button class="tab active">បកប្រែ Translate</button>
-          <button class="tab">CC Subtitle</button>
+      <section class="quick-card panel">
+        <div class="section-title">
+          <div><span class="eyebrow">STEP 2</span><h2>AI Translate</h2></div>
         </div>
-        <div class="language-row">
-          <select id="sourceLanguage">
-            <option>Auto Detect</option><option>Chinese</option><option>English</option><option>Thai</option><option>Korean</option><option>Japanese</option><option>Vietnamese</option><option>Khmer</option>
-          </select>
-          <span>⇄</span>
-          <select id="targetLanguage">
-            <option>Khmer</option><option>English</option><option>Chinese</option><option>Thai</option><option>Vietnamese</option>
-          </select>
+        <div class="quick-body">
+          <div class="field-group">
+            <label>Original Language</label>
+            <select id="sourceLanguage">
+              <option>Auto Detect</option><option>Chinese</option><option>English</option><option>Thai</option><option>Korean</option><option>Japanese</option><option>Vietnamese</option><option>Khmer</option>
+            </select>
+          </div>
+          <div class="swap">↓</div>
+          <div class="field-group">
+            <label>Translate To</label>
+            <select id="targetLanguage">
+              <option>Khmer</option><option>English</option><option>Chinese</option><option>Thai</option><option>Vietnamese</option>
+            </select>
+          </div>
+
+          <button class="primary hero-action" id="analyzeVideoBtn">✨ Auto Subtitle + Translate</button>
+          <p class="action-note">One click: detect speech → create timestamps → translate to Khmer.</p>
+
+          <div class="mini-actions">
+            <button class="ghost" id="translateBtn">Translate Existing SRT</button>
+            <button class="ghost" id="addSubtitleBtn">＋ Add Subtitle</button>
+          </div>
+
+          <div class="help-card">
+            <b>របៀបប្រើងាយៗ</b>
+            <ol>
+              <li>បើកវីដេអូ</li>
+              <li>ដាក់ Gemini API Key ក្នុង Settings</li>
+              <li>ចុច Auto Subtitle + Translate</li>
+              <li>ពិនិត្យហើយ Export SRT</li>
+            </ol>
+          </div>
         </div>
-        <div class="translate-toolbar">
-          <button class="primary grow" id="analyzeVideoBtn">✦ Auto Subtitle + Translate Video</button>
+      </section>
+
+      <section class="subtitle-card panel">
+        <div class="section-title row-between">
+          <div><span class="eyebrow">STEP 3</span><h2>Subtitle Editor</h2></div>
+          <div class="status-text" id="clipLabel">No media loaded</div>
         </div>
-        <div class="translate-toolbar">
-          <button class="ghost grow" id="translateBtn">Translate Existing Subtitle</button>
-          <button class="ghost" id="addSubtitleBtn">＋ Add</button>
+        <div class="subtitle-head">
+          <span># / Time</span><span>Original</span><span>Khmer / Target</span>
         </div>
         <div class="subtitle-list" id="subtitleList"></div>
       </section>
 
-      <section class="timeline-card panel">
-        <div class="timeline-head">
-          <div><strong>Timeline</strong><span id="clipLabel">No media loaded</span></div>
-          <div class="timeline-actions"><button id="splitBtn">✂ Split</button><button id="deleteBtn">🗑 Delete</button><label>Auto Sync <input type="checkbox" checked /></label></div>
-        </div>
-        <div class="ruler"><span>00:00</span><span>00:30</span><span>01:00</span><span>01:30</span><span>02:00</span></div>
-        <div class="tracks" id="tracks">
-          <div class="track"><label>CC Subtitle (Source)</label><div class="track-content" id="sourceTrack"></div></div>
-          <div class="track"><label>CC Subtitle (Khmer)</label><div class="track-content khmer-track" id="targetTrack"></div></div>
-          <div class="track"><label>🎙 Dubbing</label><div class="wave pink"></div></div>
-          <div class="track"><label>♪ Original Audio</label><div class="wave blue"></div></div>
-          <div class="track"><label>♫ Background Score</label><div class="wave purple"></div></div>
-          <div class="playhead" id="playhead"></div>
-        </div>
-      </section>
-
       <section class="voice-card panel">
-        <div class="panel-tabs">
-          <button class="tab active">សម្លេង Voice Dubbing</button>
-          <button class="tab">AI Voice Library</button>
+        <div class="section-title">
+          <div><span class="eyebrow">OPTIONAL</span><h2>Voice Preview</h2></div>
         </div>
-        <div class="field-label">Target Language</div>
-        <select class="full"><option>🇰🇭 Khmer</option><option>🇺🇸 English</option><option>🇨🇳 Chinese</option></select>
-        <div class="field-label">Voice Preview</div>
         <div class="voice-list" id="voiceList">
-          <button class="voice active" data-voice="Sovann"><span class="avatar">S</span><span><b>Sovann</b><small>Male · Deep · Natural</small></span><i>Local</i></button>
+          <button class="voice active" data-voice="Sovann"><span class="avatar">S</span><span><b>Sovann</b><small>Male · Deep · Natural</small></span></button>
           <button class="voice" data-voice="Dara"><span class="avatar">D</span><span><b>Dara</b><small>Female · Warm · Clear</small></span></button>
           <button class="voice" data-voice="Pheakdey"><span class="avatar">P</span><span><b>Pheakdey</b><small>Male · Young · Energetic</small></span></button>
           <button class="voice" data-voice="Sreynich"><span class="avatar">S</span><span><b>Sreynich</b><small>Female · Soft · Emotional</small></span></button>
           <button class="voice" data-voice="Adam"><span class="avatar">A</span><span><b>Adam</b><small>Male · Dominant · Firm</small></span></button>
         </div>
-        <button class="primary full-btn" id="voicePreviewBtn">▶ Preview Voice</button>
+        <button class="primary full-btn" id="voicePreviewBtn">▶ Preview Selected Voice</button>
+      </section>
+
+      <details class="advanced panel">
+        <summary>Advanced Timeline / កែពេលវេលាលម្អិត</summary>
+        <div class="timeline-head">
+          <div class="timeline-actions">
+            <button id="splitBtn">✂ Split</button>
+            <button id="deleteBtn">🗑 Delete Last</button>
+            <label>Auto Sync <input type="checkbox" checked /></label>
+          </div>
+        </div>
+        <div class="ruler"><span>00:00</span><span>00:30</span><span>01:00</span><span>01:30</span><span>02:00</span></div>
+        <div class="tracks" id="tracks">
+          <div class="track"><label>Source</label><div class="track-content" id="sourceTrack"></div></div>
+          <div class="track"><label>Khmer</label><div class="track-content khmer-track" id="targetTrack"></div></div>
+          <div class="track"><label>🎙 Dubbing</label><div class="wave pink"></div></div>
+          <div class="track"><label>♪ Original</label><div class="wave blue"></div></div>
+          <div class="playhead" id="playhead"></div>
+        </div>
+      </details>
+
+      <section class="export-card panel">
+        <div>
+          <span class="eyebrow">STEP 4</span>
+          <h2>Ready to Export</h2>
+          <p>Save your translated subtitles as SRT.</p>
+        </div>
+        <button class="primary export-big" onclick="document.getElementById('exportBtn').click()">⬇ Export Khmer SRT</button>
       </section>
     </main>
-
-    <footer class="statusbar">
-      <div><strong>Nexora Dub.Ai Plus</strong><small>v3.2 Windows</small></div>
-      <div><strong>AI Video Analysis</strong><small id="modelStatus">Gemini model</small></div>
-      <div><strong>Auto Subtitle</strong><small>Real video dialogue + timestamps</small></div>
-      <div><strong>Khmer Translation</strong><small>Gemini translation pipeline</small></div>
-    </footer>
   </div>
 
   <dialog id="settingsDialog">
@@ -138,7 +156,7 @@
       <label>Gemini API Key<input id="apiKey" type="password" placeholder="Paste your Gemini API key" /></label>
       <label>Gemini Model<input id="modelName" list="models" placeholder="gemini-2.5-flash" /></label>
       <datalist id="models"><option value="gemini-2.5-flash"></option><option value="gemini-2.5-pro"></option><option value="gemini-3.5-flash"></option><option value="gemini-3.8-flash"></option></datalist>
-      <p class="hint">Auto Subtitle uploads the selected video to Gemini for speech/timestamp analysis. Uploaded analysis files are deleted by Nexora after the request finishes. Your API key stays in this Windows app's local user-data folder.</p>
+      <p class="hint">Your API key is stored only in this Windows app's local user-data folder.</p>
       <div class="modal-actions"><button value="cancel" class="ghost">Cancel</button><button type="button" class="primary" id="saveSettingsBtn">Save Settings</button></div>
     </form>
   </dialog>
