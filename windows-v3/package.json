@@ -1,8 +1,8 @@
 {
   "name": "nexora-dub-ai-windows-v3",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "private": true,
-  "description": "Nexora Dub.Ai Plus Windows desktop studio",
+  "description": "Nexora Dub.Ai Plus Windows desktop studio with real Gemini video subtitle analysis",
   "author": "Nexora",
   "main": "electron/main.js",
   "scripts": {
