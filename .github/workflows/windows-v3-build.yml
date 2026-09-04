@@ -1,0 +1,45 @@
+name: Build Nexora Dub.Ai Windows v3
+
+on:
+  push:
+    branches: [windows-redesign-v3]
+    paths:
+      - 'windows-v3/**'
+      - '.github/workflows/windows-v3-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: windows-v3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build portable Windows app
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run build:win
+
+      - name: Show output
+        run: Get-ChildItem -Path dist -Recurse | Select-Object FullName,Length
+
+      - name: Upload Windows package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Nexora-Dub-Ai-Plus-Windows-v3.0
+          path: |
+            windows-v3/dist/*.exe
+            windows-v3/dist/*.zip
+          if-no-files-found: error
+          retention-days: 30
