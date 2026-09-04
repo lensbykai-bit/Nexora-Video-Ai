@@ -6,5 +6,10 @@ contextBridge.exposeInMainWorld('nexora', {
   saveSrt: (payload) => ipcRenderer.invoke('save-srt', payload),
   getConfig: () => ipcRenderer.invoke('config:get'),
   setConfig: (payload) => ipcRenderer.invoke('config:set', payload),
-  translateGemini: (payload) => ipcRenderer.invoke('translate:gemini', payload)
+  analyzeVideo: (payload) => ipcRenderer.invoke('analysis:video', payload),
+  translateGemini: (payload) => ipcRenderer.invoke('translate:gemini', payload),
+  onAnalysisStatus: (callback) => {
+    ipcRenderer.removeAllListeners('analysis:status');
+    ipcRenderer.on('analysis:status', (_event, message) => callback(message));
+  }
 });
